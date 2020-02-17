@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import visdom
 import onnx
+from onnx import optimizer, utils
 
 viz = visdom.Visdom()
 
@@ -26,7 +27,7 @@ data_test_loader = DataLoader(data_test, batch_size=1024, num_workers=8)
 
 net = LeNet5()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=2e-3)
+adam = optim.Adam(net.parameters(), lr=2e-3)
 
 cur_batch_win = None
 cur_batch_win_opts = {
@@ -43,7 +44,7 @@ def train(epoch):
     net.train()
     loss_list, batch_list = [], []
     for i, (images, labels) in enumerate(data_train_loader):
-        optimizer.zero_grad()
+        adam.zero_grad()
 
         output = net(images)
 
@@ -63,7 +64,7 @@ def train(epoch):
                                      opts=cur_batch_win_opts)
 
         loss.backward()
-        optimizer.step()
+        adam.step()
 
 
 def test():
@@ -84,16 +85,17 @@ def train_and_test(epoch):
     train(epoch)
     test()
 
-    dummy_input = torch.randn(1, 1, 32, 32, requires_grad=True)
-    torch.onnx.export(net, dummy_input, "lenet.onnx")
-
-    onnx_model = onnx.load("lenet.onnx")
-    onnx.checker.check_model(onnx_model)
-
 
 def main():
     for e in range(1, 16):
         train_and_test(e)
+
+    dummy_input = torch.randn(1, 1, 32, 32, requires_grad=True)
+    torch.onnx.export(net, dummy_input, "lenet.onnx")
+
+    onnx_model = onnx.load("lenet.onnx")
+    onnx_model = onnx.shape_inference.infer_shapes(onnx_model)
+    onnx.checker.check_model(onnx_model)
 
 
 if __name__ == '__main__':
