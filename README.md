@@ -1,6 +1,6 @@
-# LeNet-5
+# ParalleNet
 
-This implements a slightly modified LeNet-5 [LeCun et al., 1998a] and achieves an accuracy of ~99% on the [MNIST dataset](http://yann.lecun.com/exdb/mnist/).
+This implements a modified LeNet-5 [LeCun et al., 1998a] with parallel layers and achieves an accuracy of ~99% on the [MNIST dataset](http://yann.lecun.com/exdb/mnist/).
 
 
 ![Epoch Train Loss visualization](https://i.imgur.com/h4h7CrF.gif)
@@ -29,7 +29,7 @@ $ python run.py
 
 See epoch train loss live graph at [`http://localhost:8097`](http://localhost:8097).
 
-The trained model will be exported as ONNX to `lenet.onnx`. The `lenet.onnx` file can be viewed with [Neutron](https://www.electronjs.org/apps/netron)
+The trained model will be exported as ONNX to `lenet.onnx`. The `lenet.onnx` file can be viewed with [Netron](https://www.electronjs.org/apps/netron).
 
 ## References
 
