@@ -74,13 +74,13 @@ class F5(nn.Module):
         return output
 
 
-class LeNet5(nn.Module):
+class ParalleNet(nn.Module):
     """
     Input - 1x32x32
     Output - 10
     """
     def __init__(self):
-        super(LeNet5, self).__init__()
+        super(ParalleNet, self).__init__()
 
         self.c1 = C1()
         self.c2_1 = C2() 

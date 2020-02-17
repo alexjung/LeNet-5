@@ -1,4 +1,4 @@
-from lenet import LeNet5
+from parallenet import ParalleNet
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -25,7 +25,7 @@ data_test = MNIST('./data/mnist',
 data_train_loader = DataLoader(data_train, batch_size=256, shuffle=True, num_workers=8)
 data_test_loader = DataLoader(data_test, batch_size=1024, num_workers=8)
 
-net = LeNet5()
+net = ParalleNet()
 criterion = nn.CrossEntropyLoss()
 adam = optim.Adam(net.parameters(), lr=2e-3)
 
