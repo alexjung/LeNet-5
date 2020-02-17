@@ -83,8 +83,7 @@ class ParalleNet(nn.Module):
         super(ParalleNet, self).__init__()
 
         self.c1 = C1()
-        self.c2_1 = C2() 
-        self.c2_2 = C2() 
+        self.c2 = C2()
         self.c3 = C3() 
         self.f4 = F4() 
         self.f5 = F5() 
@@ -92,8 +91,8 @@ class ParalleNet(nn.Module):
     def forward(self, img):
         output = self.c1(img)
 
-        x = self.c2_1(output)
-        output = self.c2_2(output)
+        x = self.c2(output)
+        output = self.c2(output)
 
         output += x
 
