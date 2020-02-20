@@ -37,7 +37,7 @@ class C3(nn.Module):
         super(C3, self).__init__()
 
         self.c3 = nn.Sequential(OrderedDict([
-            ('c3', nn.Conv2d(16, 120, kernel_size=(5, 5))),
+            ('c3', nn.Conv2d(16, 120, kernel_size=(3, 3))),
             ('relu3', nn.ReLU())
         ]))
 
@@ -51,7 +51,7 @@ class F4(nn.Module):
         super(F4, self).__init__()
 
         self.f4 = nn.Sequential(OrderedDict([
-            ('f4', nn.Linear(120, 84)),
+            ('f4', nn.Linear(480, 84)),
             ('relu4', nn.ReLU())
         ]))
 

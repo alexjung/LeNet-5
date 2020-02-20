@@ -22,13 +22,13 @@ except ConnectionError:
 data_train = MNIST('./data/mnist',
                    download=True,
                    transform=transforms.Compose([
-                       transforms.Resize((32, 32)),
+                       transforms.Resize((28, 28)),
                        transforms.ToTensor()]))
 data_test = MNIST('./data/mnist',
                   train=False,
                   download=True,
                   transform=transforms.Compose([
-                      transforms.Resize((32, 32)),
+                      transforms.Resize((28, 28)),
                       transforms.ToTensor()]))
 data_train_loader = DataLoader(data_train, batch_size=256, shuffle=True, num_workers=8)
 data_test_loader = DataLoader(data_test, batch_size=1024, num_workers=8)
@@ -105,7 +105,7 @@ def main():
     for e in range(1, 16):
         train_and_test(e)
 
-    dummy_input = torch.randn(1, 1, 32, 32, requires_grad=True, device=device)
+    dummy_input = torch.randn(1, 1, 28, 28, requires_grad=True, device=device)
     torch.onnx.export(net, dummy_input, "parallenet.onnx")
 
     onnx_model = onnx.load("parallenet.onnx")
