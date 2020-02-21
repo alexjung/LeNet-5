@@ -66,7 +66,7 @@ class F5(nn.Module):
 
         self.f5 = nn.Sequential(OrderedDict([
             ('f5', nn.Linear(84, 10)),
-            ('sig5', nn.LogSoftmax(dim=-1))
+            ('sig5', nn.Softmax(dim=-1))
         ]))
 
     def forward(self, img):
@@ -83,16 +83,17 @@ class ParalleNet(nn.Module):
         super(ParalleNet, self).__init__()
 
         self.c1 = C1()
-        self.c2 = C2()
-        self.c3 = C3() 
+        self.c2_1 = C2()
+        self.c2_2 = C2()
+        self.c3 = C3()
         self.f4 = F4() 
         self.f5 = F5() 
 
     def forward(self, img):
         output = self.c1(img)
 
-        x = self.c2(output)
-        output = self.c2(output)
+        x = self.c2_1(output)
+        output = self.c2_2(output)
 
         output += x
 
