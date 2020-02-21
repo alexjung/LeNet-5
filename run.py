@@ -1,3 +1,4 @@
+import os
 import argparse
 from typing import Text
 
@@ -5,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision.datasets.mnist import MNIST
+import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import visdom
@@ -13,14 +15,17 @@ from onnx import optimizer, utils
 
 from parallenet import ParalleNet
 from mininception import MinInception
+from imgnetception import ImgNetCeption
 
 supported_models = {
     "parallenet": ParalleNet(),
-    "mininception": MinInception()
+    "mininception": MinInception(),
+    "imgnetception": ImgNetCeption()
 }
 model_shapes = {
     "parallenet": (1, 1, 28, 28),
-    "mininception": (1, 1, 28, 28)
+    "mininception": (1, 1, 28, 28),
+    "imgnetception": (1, 1, 224, 224)
 }
 
 cur_batch_win = None
@@ -39,7 +44,7 @@ parser.add_argument(
     "model",
     type=Text,
     default="parallenet",
-    choices=["parallenet", "mininception"],
+    choices=["parallenet", "mininception", "imgnetception"],
     help="Choose model to train."
 )
 parser.add_argument(
@@ -48,6 +53,11 @@ parser.add_argument(
     default="cpu",
     choices=["cpu", "cuda"],
     help="Choose the device training should be run on."
+)
+parser.add_argument(
+    "--data",
+    metavar='DIR',
+    help="Path to ImageNet dataset."
 )
 
 
@@ -87,6 +97,35 @@ def main():
         data_train_loader = DataLoader(data_train, batch_size=256, shuffle=True, num_workers=8)
         data_test_loader = DataLoader(data_test, batch_size=1024, num_workers=8)
 
+    elif model_name in ["imgnetception"]:
+        traindir = os.path.join(args.data, 'ILSVRC2012_img_train')
+        valdir = os.path.join(args.data, 'ILSVRC2012_img_val')
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
+
+        train_dataset = datasets.ImageFolder(
+            traindir,
+            transforms.Compose([
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]))
+
+        data_train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=64, shuffle=True,
+            num_workers=8, pin_memory=True)
+
+        data_test_loader = torch.utils.data.DataLoader(
+            datasets.ImageFolder(valdir, transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                normalize,
+            ])),
+            batch_size=1024, shuffle=False,
+            num_workers=8, pin_memory=True)
+
     else:
         print("ERROR: Not supported yet")
         exit(1)
@@ -109,10 +148,10 @@ def train(train_loader, model, criterion, optimizer, epoch, device, viz):
     for i, (images, labels) in enumerate(train_loader):
         optimizer.zero_grad()
 
-        images = images.to(device=device)
-        labels = labels.to(device=device)
-        output = model(images)
+        images = images.to(device=device, non_blocking=True)
+        labels = labels.to(device=device, non_blocking=True)
 
+        output = model(images)
         loss = criterion(output, labels)
 
         loss_list.append(loss.detach().item())
